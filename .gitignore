@@ -1,0 +1,11 @@
+# Ignore output files 
+*.o
+*.lst
+*.bin
+*.hex
+*.elf
+*.map
+*.asm
+drivers/
+docs/
+bin/
