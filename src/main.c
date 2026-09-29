@@ -1,7 +1,7 @@
 /**
  * MDH 868MHz Lone Worker Alarm / Pendant
  *
- * Micro - STM32G030K6T6 32kbyte flash, 8kbyte RAM
+ * Micro - STM32G071CBT6 128kbyte flash, 36kbyte RAM
  *
 **/
 #include "main.h"
@@ -278,7 +278,7 @@ int main(void)
  * @brief  Low level system configuration
  * @retval None
  *
- * Gets called from startup_stm32g050xx.s before main
+ * Gets called from startup_stm32g071xx.s before main
  *
 **/
 void SystemInit(void)
@@ -288,7 +288,7 @@ void SystemInit(void)
   while (!(RCC->CR & RCC_CR_HSIRDY)) {};   /* Wait for HSI to stabilise */
 
   /* Set AHB & APB pre-scaler to 1 */
-  RCC->CFGR &= ((RCC_CFGR_HPRE_Msk) | (RCC_CFGR_PPRE_Msk));
+  RCC->CFGR &= ~(RCC_CFGR_HPRE_Msk | RCC_CFGR_PPRE_Msk);
 
   /* Sysclk clock source is HSI */
   MODIFY_REG(RCC->CFGR, RCC_CFGR_SW, 0);

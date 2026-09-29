@@ -8,7 +8,7 @@
 
 extern struct parameters params;
 
-#define FLASH_TOP_PAGE          0x08007800  
+#define FLASH_TOP_PAGE          0x0801F800U /* Reserved final 2 KB flash page */  
 
 #define PARAMETER_STRING_LEN    16
 

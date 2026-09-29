@@ -48,7 +48,7 @@ vpath %.c $(SOURCE_DIR)
 # Startup and system
 SRCS += syscalls.c
 #
-ASMS += device/startup_stm32g030k6tx.s
+ASMS += device/startup_stm32g071xx.s
 #
 ##############################################################################
 # Compiler executables
@@ -80,7 +80,7 @@ BUILDNUM = $(shell awk -f buildinc.awk)
 ASM_DEFS =
 #
 # C defines
-C_DEFS = -DSTM32G030xx
+C_DEFS = -DSTM32G071xx
 #
 # Assembler includes
 ASM_INCLUDES =
@@ -98,7 +98,7 @@ CFLAGS = $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -g3 -fno-eliminate-unused-debug-t
 # LDFLAGS
 #
 # link script
-LDSCRIPT = device/STM32G030K6TX_FLASH.ld
+LDSCRIPT = device/STM32G071CBTX_FLASH.ld
 #
 # libraries
 LIBS = -lc -lm -lnosys
@@ -140,7 +140,7 @@ $(BUILD_DIR)/%.o: %.s Makefile | $(BUILD_DIR)
 	$(CC) -x assembler-with-cpp -c $(CFLAGS) $< -o $@
 #
 # Link the object files
-$(BUILD_DIR)/$(BUILD_NAME).elf: $(OBJECTS) Makefile
+$(BUILD_DIR)/$(BUILD_NAME).elf: $(OBJECTS) Makefile $(LDSCRIPT)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 	$(SZ) $@
 #	@echo Build number: $(BUILDNUM)

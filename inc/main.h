@@ -21,7 +21,6 @@ struct packet_t {
 	uint8_t message_type;				/* Message type             */
 };
 
-#include "stm32g030xx.h"
 #include "stm32g0xx.h"
 #include "delay.h"
 #include "rfm69hw_regs.h"

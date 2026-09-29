@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "name": "windows-gcc-arm64",
+      "name": "windows-gcc-arm",
       "includePath": [
         "${workspaceFolder}/**",
         "${workspaceFolder}/inc"
@@ -9,13 +9,13 @@
       "compilerPath": "C:/ST/STM32CubeIDE_2.2.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.win32_1.0.100.202602081740/tools/bin/arm-none-eabi-gcc.exe",
       "cStandard": "${default}",
       "cppStandard": "${default}",
-      "intelliSenseMode": "windows-gcc-arm64",
+      "intelliSenseMode": "windows-gcc-arm",
       "compilerArgs": [
         "-mcpu=cortex-m0plus",
         "-mthumb"
       ],
       "defines": [
-        "STM32G031xx"
+        "STM32G071xx"
       ]
     }
   ],

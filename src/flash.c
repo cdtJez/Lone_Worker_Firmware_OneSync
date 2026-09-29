@@ -37,7 +37,8 @@ void flash_write(uint8_t *address, int size, uint8_t *data)
   FLASH->SR |= FLASH_SR_ERROR_FLAGS;
 
   /* Set the page erase mode and page */
-  MODIFY_REG(FLASH->CR, 0x1ff8, (15 << 3) | FLASH_CR_PER);
+  MODIFY_REG(FLASH->CR, FLASH_CR_PNB_Msk | FLASH_CR_PER,
+             (((FLASH_TOP_PAGE - FLASH_BASE) / 2048U) << FLASH_CR_PNB_Pos) | FLASH_CR_PER);
 
   /* Start the erase */
   FLASH->CR |= FLASH_CR_STRT;

@@ -57,7 +57,7 @@
   "C_Cpp_Runner.compilerArgs": [
     "-mcpu=cortex-m0plus",
     "-mthumb",
-    "-DSTM32G031xx"
+    "-DSTM32G071xx"
   ],
   "C_Cpp_Runner.includePaths": [
     "${workspaceFolder}/inc"
