@@ -35,8 +35,8 @@ void adc_init(void)
 /* Enable VREF*/
   ADC->CCR |= ADC_CCR_VREFEN;
 
-/* Input is on PB0 which is ADC_IN1 */
-  ADC1->CHSELR |= (ADC_CHSELR_CHSEL1);
+/* VLIPO is on PA5/pin 16, ADC_IN5 (approved move from PC6/pin 30). */
+  ADC1->CHSELR |= (ADC_CHSELR_CHSEL5);
   
 /* Enable the ADC */
   ADC1->CR |= (ADC_CR_ADEN);

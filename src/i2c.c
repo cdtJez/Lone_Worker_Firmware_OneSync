@@ -7,7 +7,7 @@
 #include "main.h"
 
 
-/* PORTC pinout */
+/* GPIOB pinout: PB6/SCL, PB7/SDA (unchanged). */
 #define SCL               6
 #define SDA               7
 

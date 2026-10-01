@@ -6,43 +6,64 @@
 **/
 #include "main.h"
 
-/* Port use - */
-/* --------------------------------------------------------------------------*/
-/* | Port | Pin | Dir | Pull | Name  - Function                             |*/
-/* --------------------------------------------------------------------------*/
-/* | PB9  |  1  |  I  |  PU  | STAT  - input from charger                 	|*/
-/* | PC14 |  2  |  I  |  A   | NC                                           |*/
-/* | PC15 |  3  |  I  |  A   | ACT   - alarm button input    - active PU/PD |*/
-/* | VDD  |  4  | PWR |      | Power - 3V                                   |*/
-/* | VSS  |  5  | PWR |      | Power - ground                               |*/
-/* | NRST |  6  |  I  |      | Reset input                                  |*/
-/* | PA0  |  7  |  A  |  N   | VUSB  - Potential divider on USB +V          |*/
-/* | PA1  |  8  |  A  |  N   | VLIPO - Potential divider on Lipo cell       |*/
-/* | PA2  |  9  |  O  |  N   | Tx    - RS232 Transmit                       |*/
-/* | PA3  | 10  |  I  |  N   | Rx    - RS232 Receive                        |*/
-/* | PA4  | 11  |  O  |  N   | NSS   - RFM69 SPI select                     |*/
-/* | PA5  | 12  |  O  |  N   | CLK   - RFM69 SPI clock                      |*/
-/* | PA6  | 13  |  I  |  N   | MISO  - RFM69 SPI master in slave out        |*/
-/* | PA7  | 14  |  O  |  N   | MOSI  - RFM69 SPI master out slave in        |*/
-/* | PB0  | 15  |  O  |  N   | BLUE  - blue LED drive                       |*/
-/* | PB1  | 16  |  O  |  N   | RED   - red LED drive                        |*/
-/* | PB2  | 17  |  O  |  N   | GREEN - green LED drive                      |*/
-/* | PA8  | 18  |  I  |  N   |       - RFM69 reset - Input then output      |*/
-/* | PA9  | 19  |  I  |  PU  |       - RFM69 packet ready signal            |*/
-/* | PC6  | 20  |  X  |  N   | SET   - settings button input - active PU/PD |*/
-/* | PA10 | 21  |  X  |  N   | NC                                           |*/
-/* | PA11 | 22  |  X  |  N   | NC                                           |*/
-/* | PA12 | 23  |  X  |  N   | NC                                           |*/
-/* | PA13 | 24  |  B  |  N   | SWDIO - programming data i/o                 |*/
-/* | PA14 | 25  |  I  |  N   | SWCLK - programming clock                    |*/
-/* | PA15 | 26  |  X  |  N   | NC                                           |*/
-/* | PB3  | 27  |  O  |  N   | VIB   - vibrator drive                       |*/
-/* | PB4  | 28  |  O  |  N   | BUZZ  - buzzer drive                         |*/
-/* | PB5  | 29  |  I  |  PU  | INT   - interrupt input from accelerometer   |*/
-/* | PB6  | 30  |  O  |  EXT | SCL   - accelerometer I2C clock              |*/
-/* | PB7  | 31  |  B  |  EXT | SDA   - accelerometer I2C data               |*/
-/* | PB8  | 32  |  X  |  N   | NC                                           |*/
-/* --------------------------------------------------------------------------*/
+/* Port use - U8 STM32G071CBT6, LQFP48, CA01003 schematic rev 1.1.
+ * VLIPO is moved from PC6/pin 30 to PA5/pin 16 (ADC_IN5).
+ * Dir: I=input, O=output, B=bidirectional, A=analogue, X=unused.
+ * -----------------------------------------------------------------------------
+ * | Port | Pin | Dir | Signal  - Function                                       |
+ * -----------------------------------------------------------------------------
+ * | PC13 |   1 |  O  | BLUE    - blue LED / activity, active high                |
+ * | PC14 |   2 |  O  | RED     - red LED, active high                            |
+ * | PC15 |   3 |  O  | GREEN   - green LED, active high                          |
+ * | VBAT |   4 |  X  | NC      - backup supply not connected in schematic        |
+ * | VREF+|   5 | PWR | 3V0     - ADC reference supply                            |
+ * | VDD  |   6 | PWR | 3V0     - processor supply                                |
+ * | VSS  |   7 | PWR | GND     - ground                                          |
+ * | PF0  |   8 |  I  | SET     - setting button, active low, switched PU/PD      |
+ * | PF1  |   9 |  I  | ACT     - alarm button, active low, switched PU/PD        |
+ * | PF2  |  10 |  I  | NRST    - processor reset                                |
+ * | PA0  |  11 |  I  | VINP    - serial connector presence, active high          |
+ * | PA1  |  12 |  O  | SCK     - radio SPI1 clock, AF0                           |
+ * | PA2  |  13 |  O  | MOSI    - radio SPI1 data output, AF0                     |
+ * | PA3  |  14 |  A  | VUSB    - USB voltage divider, not sampled               |
+ * | PA4  |  15 |  O  | NSS     - radio SPI select, active low GPIO               |
+ * | PA5  |  16 |  A  | VLIPO   - battery divider, ADC_IN5; wiring change needed  |
+ * | PA6  |  17 |  I  | MISO    - radio SPI1 data input, AF0, pull-down           |
+ * | PA7  |  18 |  X  | NC                                                       |
+ * | PB0  |  19 |  O  | BUZZ    - buzzer drive; sequence buzzer flags disabled   |
+ * | PB1  |  20 |  I  | INT     - accelerometer interrupt; driver polls I2C       |
+ * | PB2  |  21 |  X  | NC                                                       |
+ * | PB10 |  22 |  X  | NC                                                       |
+ * | PB11 |  23 |  X  | NC                                                       |
+ * | PB12 |  24 |  X  | NC                                                       |
+ * | PB13 |  25 |  X  | NC                                                       |
+ * | PB14 |  26 |  O  | EX_RST  - expander reset; not configured by firmware      |
+ * | PB15 |  27 |  I  | EX_INT  - expander interrupt; not used by firmware        |
+ * | PA8  |  28 |  X  | NC                                                       |
+ * | PA9  |  29 |  O  | TX      - serial USART1 transmit, AF1                     |
+ * | PC6  |  30 |  X  | NC      - former VLIPO connection, moved to PA5           |
+ * | PC7  |  31 |  X  | NC                                                       |
+ * | PA10 |  32 |  I  | RX      - serial USART1 receive, AF1                      |
+ * | PA11 |  33 | I/O | RESET   - radio reset, input at startup then output low   |
+ * | PA12 |  34 |  I  | DIO0    - radio packet-ready input                       |
+ * | PA13 |  35 |  B  | SWDIO   - programming/debug data                         |
+ * | PA14 |  36 |  I  | BOOT    - BOOT0 / SWCLK programming/debug clock           |
+ * | PA15 |  37 |  X  | NC                                                       |
+ * | PD0  |  38 |  X  | NC                                                       |
+ * | PD1  |  39 |  X  | NC                                                       |
+ * | PD2  |  40 |  X  | NC                                                       |
+ * | PD3  |  41 |  X  | NC                                                       |
+ * | PB3  |  42 |  X  | NC                                                       |
+ * | PB4  |  43 |  X  | NC                                                       |
+ * | PB5  |  44 |  O  | VIB     - vibrator drive, active high                    |
+ * | PB6  |  45 |  O  | SCL     - shared software I2C clock, open drain           |
+ * | PB7  |  46 |  B  | SDA     - shared software I2C data, open drain            |
+ * | PB8  |  47 |  X  | NC                                                       |
+ * | PB9  |  48 |  I  | STAT    - charger status, active low, switched PU/PD      |
+ * -----------------------------------------------------------------------------
+ * Directions describe signal use; unimplemented signals retain reset settings.
+ * Existing usart2_* function names access USART1 on PA9/PA10.
+ */
 
 /* Timer variables */
 uint32_t tick = 0;
@@ -141,8 +162,8 @@ int main(void)
 /* Enable the power control block */
   RCC->APBENR1 |= RCC_APBENR1_PWREN;
 
-/* Enable clock to GPIOA, GPIOB & GPIOC */
-  RCC->IOPENR |= (RCC_IOPENR_GPIOAEN | RCC_IOPENR_GPIOBEN | RCC_IOPENR_GPIOCEN);
+/* Enable clock to GPIOA, GPIOB, GPIOC and GPIOF (SET/ACT). */
+  RCC->IOPENR |= (RCC_IOPENR_GPIOAEN | RCC_IOPENR_GPIOBEN | RCC_IOPENR_GPIOCEN | RCC_IOPENR_GPIOFEN);
 
 /* Load the parameters */
   parameter_load(&params);
@@ -175,7 +196,7 @@ int main(void)
 /* Initialise the tilt sensor */
   fxls8964_init();
   
-/* Set PB7 as an input with pullup to signal that the serial is active */
+/* Set VINP/PA0 as the serial-presence input. */
   usart2_sen_init();
 
 /* If the serial is plugged in, print a sign on string */

@@ -22,11 +22,11 @@ void spi_init(void)
 {
 //  RCC->IOPENR |= RCC_IOPENR_GPIOAEN;                /* Enable clock to GPIOA - done in main */
 
-/* Set PA4 (NSS) to be an output, PA5 (SCK), PA6 (MISO) & PA7 (MOSI) to be alternative function */
-  MODIFY_REG(GPIOA->MODER, ((3 << 8) | (3 << 10) | (3 << 12) | (3 << 14)), ((1 << 8) | (2 << 10) | (2 << 12) | (2 << 14)));   
+/* Set PA4 (NSS) to be an output, PA1 (SCK), PA6 (MISO) & PA2 (MOSI) to be alternative function */
+  MODIFY_REG(GPIOA->MODER, ((3 << 8) | (3 << 2) | (3 << 12) | (3 << 4)), ((1 << 8) | (2 << 2) | (2 << 12) | (2 << 4)));   
 
-/* Set PA5, PA6 & PA7 to be AF0 (SPI1) */
-  MODIFY_REG(GPIOA->AFR[0], ((15 << 20) | (15 << 24) | (15 << 28)), 0);
+/* Set PA1, PA6 & PA2 to be AF0 (SPI1) */
+  MODIFY_REG(GPIOA->AFR[0], ((15 << 4) | (15 << 24) | (15 << 8)), 0);
 
 /* Pull down on MISO (PA6) */  
   MODIFY_REG(GPIOA->PUPDR, (3 << 12), (2 << 12));

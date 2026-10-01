@@ -12,15 +12,15 @@
 int32_t input_set_count;                 /* Setting debounce counter      */
 int32_t input_alarm_count;               /* Alarm debounce counter        */
 
-#define INPUT_SETTING_BIT          6     /* Input setting = PC14          */
+#define INPUT_SETTING_BIT          0     /* Input setting = PF0           */
 #define INPUT_SETTING_MASK       (1 << INPUT_SETTING_BIT)
-#define INPUT_ALARM_BIT           15     /* Input alarm = PC15            */
+#define INPUT_ALARM_BIT            1     /* Input alarm = PF1             */
 #define INPUT_ALARM_MASK         (1 << INPUT_ALARM_BIT)
 
-/* Set pullups, pull downs or no pull on PC14 & PC15 */
-#define INPUTS_PULLUP     (MODIFY_REG(GPIOC->PUPDR, (3 << 30) | (3 << 12), (1 << 30) | (1 << 12)))
-#define INPUTS_PULLDOWN   (MODIFY_REG(GPIOC->PUPDR, (3 << 30) | (3 << 12), (2 << 30) | (2 << 12)))
-#define INPUTS_NO_PULL    (GPIOC->PUPDR &= ~(3 << 30 | 3 << 12))
+/* Set pullups, pull downs or no pull on PF0 & PF1 */
+#define INPUTS_PULLUP     (MODIFY_REG(GPIOF->PUPDR, (3 << 2) | (3 << 0), (1 << 2) | (1 << 0)))
+#define INPUTS_PULLDOWN   (MODIFY_REG(GPIOF->PUPDR, (3 << 2) | (3 << 0), (2 << 2) | (2 << 0)))
+#define INPUTS_NO_PULL    (GPIOF->PUPDR &= ~(3 << 2 | 3 << 0))
 
 
 /**
@@ -29,12 +29,12 @@ int32_t input_alarm_count;               /* Alarm debounce counter        */
  * @param  none
  * @return none
  *
- * Button on PB3
+ * Buttons on PF0 (SET) and PF1 (ACT)
  *
 **/
 void input_init(void)
 {
-  GPIOC->MODER &= ~((3 << 12) | (3 << 30));     /* Make PC6 & PC15 inputs */
+  GPIOF->MODER &= ~((3 << 0) | (3 << 2));     /* Make PF0 & PF1 inputs */
   INPUTS_PULLDOWN;                              /* Stop the inputs from floating */
 
   input_set_count  = 0;
@@ -54,7 +54,7 @@ void input_scan(void)
 {
   INPUTS_PULLUP;                                      /* Pullup resistors 55K worst case */
   delay_us(10);                                        /* Short delay to allow input capacitance (5pF) to charge */
-  int port_read = GPIOC->IDR;                         /* Read inputs */ 
+  int port_read = GPIOF->IDR;                         /* Read inputs */ 
   INPUTS_PULLDOWN;                                    /* Make sure inputs are not floating */
   
 /* Setting input events */

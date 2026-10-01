@@ -55,10 +55,10 @@ struct packet_t {
 
 #define SYSCLK              16000000
 
-/* LED pin is PB3 */
-#define LED_BIT             3
-#define LED_OFF             (GPIOB->BSRR = (1 << LED_BIT))
-#define LED_ON              (GPIOB->BRR  = (1 << LED_BIT))
+/* Activity uses the blue LED on PC13, with active-high MOSFET drive. */
+#define LED_BIT             13
+#define LED_OFF             (GPIOC->BRR  = (1 << LED_BIT))
+#define LED_ON              (GPIOC->BSRR = (1 << LED_BIT))
 
 #define GPIO_PUPD_NOPULL    0
 #define GPIO_PUPD_PULLUP    1

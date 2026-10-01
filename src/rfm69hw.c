@@ -31,8 +31,8 @@
 #include "main.h"
 
 /* Pin assignments */
-#define DIO0_PIN          11
-#define RESET_PIN         12
+#define DIO0_PIN          12
+#define RESET_PIN         11
 
 /* MDH network ID - all MDH networks use this */
 #define MDH_ID            0x7b
@@ -137,7 +137,7 @@ void rfm69hw_init(void)
 /* RFM69HW is on SPI1 */
   spi_init();
 
-/* PA11 is an input for DIO0 - payload ready signal, PA12 is RESET */
+/* PA12 is an input for DIO0 - payload ready signal, PA11 is RESET */
 //  RCC->IOPENR |= RCC_IOPENR_GPIOAEN;                            /* Enable clock to GPIOA - done in main */
   MODIFY_REG(GPIOA->MODER, (3 << 24) | (3 << 22), 0);     /* PA11 & PA12 are inputs */
 
@@ -146,9 +146,9 @@ void rfm69hw_init(void)
 
   delay_us (10000);
   
-/* Reset is now an input on the RFM69HW so set PA12 to output and low */
-  MODIFY_REG(GPIOA->MODER, (3 << 24), (1 << 24));
-  GPIOA->ODR &= ~(1 << 12);
+/* Reset is now an input on the RFM69HW so set PA11 to output and low */
+  MODIFY_REG(GPIOA->MODER, (3 << 22), (1 << 22));
+  GPIOA->ODR &= ~(1 << RESET_PIN);
 
 /* Initialise the RFM69HW */
   for (int i = 0; i < (sizeof(rfm69hw_config) / 2); i++)

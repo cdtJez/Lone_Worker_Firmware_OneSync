@@ -6,6 +6,8 @@
 **/
 #include "main.h"
 
+/* Existing usart2_* API names are retained; hardware is USART1 on PA9/PA10. */
+
 /* Baud rate register values */
 #define BAUD_16M_1200			  13333
 #define BAUD_16M_2400			   6667
@@ -20,38 +22,38 @@
 #define SERIAL_ACTIVE_PIN_MASK  (1 << SERIAL_ACTIVE_PIN)
 
 /**
- * @brief  Initialise USART2
+ * @brief  Initialise USART1
  *
 **/
 void usart2_init(void)
 {
-/* Enable clock to USART2 */
-	RCC->APBENR1 |= RCC_APBENR1_USART2EN;
+/* Enable clock to USART1 */
+	RCC->APBENR2 |= RCC_APBENR2_USART1EN;
 	
 /* Enable clock to GPIOA - done at the start of main */
 /*	RCC->IOPENR |= RCC_IOPENR_GPIOAEN; */
 
-/* Set alternate function on PA2 and PA3 */
-	MODIFY_REG(GPIOA->MODER, (3 << 4) | (3 << 6), (2 << 4) | (2 << 6));
+/* Set alternate function on PA9 and PA10 */
+	MODIFY_REG(GPIOA->MODER, (3 << 18) | (3 << 20), (2 << 18) | (2 << 20));
 
 /* Set AF1 on PA9 & PA10 */
-	MODIFY_REG(GPIOA->AFR[0], (15 << 8) | (15 << 12), (1 << 8) | (1 << 12));
+	MODIFY_REG(GPIOA->AFR[1], (15 << 4) | (15 << 8), (1 << 4) | (1 << 8));
 	
 /* Disable the USART */	
-	USART2->CR1 = 0;
+	USART1->CR1 = 0;
 	
 /* Set the baud rate */	
-	USART2->BRR = BAUD_16M_9600;
+	USART1->BRR = BAUD_16M_9600;
 	
 /* Enable the USART, Rx & Tx */
-//	USART2->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE | USART_CR1_FIFOEN;
-  USART2->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE;
+//	USART1->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE | USART_CR1_FIFOEN;
+  USART1->CR1 = USART_CR1_UE | USART_CR1_RE | USART_CR1_TE;
 }
 
 
 /**
  * @brief  Initialise PA0 as an input for the serial enable read pin.
- *         PORTB clock is enabled in the main function.
+ *         GPIOA clock is enabled in the main function.
 **/
 void usart2_sen_init(void)
 {
@@ -60,20 +62,20 @@ void usart2_sen_init(void)
 
 
 /**
- * @brief  Turn off USART2
+ * @brief  Turn off USART1
  *
 **/
 void usart2_deinit(void)
 {
-/* Make PA2 and PA3 inputs */  
-//  GPIOA->MODER &= ~((3 << 4) | (3 << 6));
-//  MODIFY_REG(GPIOA->PUPDR, ((3 << 4) | (3 << 6)), ((GPIO_PUPD_PULLDOWN << 4) | (GPIO_PUPD_PULLDOWN << 6)));  
+/* Make PA9 and PA10 inputs */  
+//  GPIOA->MODER &= ~((3 << 18) | (3 << 20));
+//  MODIFY_REG(GPIOA->PUPDR, ((3 << 18) | (3 << 20)), ((GPIO_PUPD_PULLDOWN << 18) | (GPIO_PUPD_PULLDOWN << 20)));  
   
 /* Disable the USART */	
-	USART2->CR1 = 0;
+	USART1->CR1 = 0;
 
-/* Disable clock to USART2 */
-	RCC->APBENR1 &= ~RCC_APBENR1_USART2EN;
+/* Disable clock to USART1 */
+	RCC->APBENR2 &= ~RCC_APBENR2_USART1EN;
 }
 
 
@@ -85,9 +87,9 @@ void usart2_deinit(void)
 void usart2_tx_char(int data)
 {
 /* Wait for Tx register to be empty */
-	while (!(USART2->ISR & USART_ISR_TXE_TXFNF)) {};
+	while (!(USART1->ISR & USART_ISR_TXE_TXFNF)) {};
 	
-	USART2->TDR = data;
+	USART1->TDR = data;
 }
 
 
@@ -98,7 +100,7 @@ void usart2_tx_char(int data)
 **/
 int usart2_rx_char(void)
 {
-  return(USART2->RDR);
+  return(USART1->RDR);
 }
 
 
@@ -109,12 +111,12 @@ int usart2_rx_char(void)
 **/
 int usart2_rx_waiting(void)
 {
-  return(USART2->ISR & USART_ISR_RXNE_RXFNE);
+  return(USART1->ISR & USART_ISR_RXNE_RXFNE);
 }
 
 
 /**
- * @brief  PB7 low indicates serial active
+ * @brief  VINP on PA0 high indicates serial active
  *
  * @return True if serial active
 **/
@@ -131,7 +133,7 @@ int usart2_serial_active(void)
 **/
 bool usart2_txfifo_empty(void)
 {
-  return((USART2->ISR & USART_ISR_TXFE) != 0);
+  return((USART1->ISR & USART_ISR_TXFE) != 0);
 }
 
 

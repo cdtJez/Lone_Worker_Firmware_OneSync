@@ -6,24 +6,35 @@
 #include "main.h"
 
 
-#define LED_BLUE_BIT       0
+#define LED_BLUE_BIT       13
 #define LED_BLUE_MASK     (1 << LED_BLUE_BIT)
 
-#define LED_RED_BIT        1
+#define LED_RED_BIT        14
 #define LED_RED_MASK      (1 << LED_RED_BIT)
 
-#define LED_GREEN_BIT      2
+#define LED_GREEN_BIT      15
 #define LED_GREEN_MASK    (1 << LED_GREEN_BIT)
 
-#define VIBRATOR_BIT       3
+#define VIBRATOR_BIT       5
 #define VIBRATOR_MASK     (1 << VIBRATOR_BIT)
 
-#define BUZZER_BIT         4
+#define BUZZER_BIT         0
 #define BUZZER_MASK       (1 << BUZZER_BIT)
 
-//#define SEQUENCE_PORT_BIT_MASK    (LED_RED_MASK | LED_GREEN_MASK | LED_BLUE_MASK | VIBRATOR_MASK | BUZZER_MASK)
-#define SEQUENCE_PORT_BIT_MASK    (LED_RED_MASK | LED_GREEN_MASK | LED_BLUE_MASK | VIBRATOR_MASK)
+#define SEQUENCE_LED_PORT_MASK    (LED_RED_MASK | LED_GREEN_MASK | LED_BLUE_MASK)
 #define SEQUENCE_TABLE_END_TOKEN  0xff
+
+/* Map the existing byte-sized sequence flags to the new physical ports.
+ * Buzzer flags remain disabled, as in the original port mask.
+ */
+static void sequence_write_pins(uint8_t data)
+{
+  uint32_t leds = ((data & LED_B) ? LED_BLUE_MASK : 0U) |
+                  ((data & LED_R) ? LED_RED_MASK : 0U) |
+                  ((data & LED_G) ? LED_GREEN_MASK : 0U);
+  MODIFY_REG(GPIOC->ODR, SEQUENCE_LED_PORT_MASK, leds);
+  MODIFY_REG(GPIOB->ODR, VIBRATOR_MASK, (data & VIB) ? VIBRATOR_MASK : 0U);
+}
 
 
 int sequence_loop_counter = 0;    /* Number of times to go through the table              */
@@ -52,14 +63,17 @@ uint8_t sequence_colours[]          = { BLANK, LED_R, LED_R, BLANK, LED_G, LED_G
 **/
 void sequencer_init(void)
 {
-/* Set PB0 (LED blue), PB1 (LED red), PB2 (LED green), PB3 (vibrator) to outputs & PB4 (buzzer) */
-  MODIFY_REG(GPIOB->MODER, ((3 << 0) | (3 << 2) | (3 << 4) | (3 << 6) | (3 << 8)), ((1 << 0) | (1 << 2) | (1 << 4) | (1 << 6) | (1 << 8)));
+/* PC13/PC14/PC15 are blue/red/green; PB5 is vibrator; PB0 is buzzer. */
+  MODIFY_REG(GPIOC->MODER, ((3UL << 26) | (3UL << 28) | (3UL << 30)),
+             ((1UL << 26) | (1UL << 28) | (1UL << 30)));
+  MODIFY_REG(GPIOB->MODER, ((3 << 10) | (3 << 0)), ((1 << 10) | (1 << 0)));
 
 /* Set the outputs low */
-  GPIOB->BRR = SEQUENCE_PORT_BIT_MASK;
+  GPIOC->BRR = SEQUENCE_LED_PORT_MASK;
+  GPIOB->BRR = VIBRATOR_MASK;
 
-/* Set AF1 (TIM3 CH1) for PB4 */
-  MODIFY_REG(GPIOB->AFR[0], (15 << 16), (1 << 16));
+/* Set AF1 (TIM3 CH3) for PB0. */
+  MODIFY_REG(GPIOB->AFR[0], (15 << 0), (1 << 0));
 
   sequencer_setup(1, sequence_startup);
 }
@@ -88,7 +102,8 @@ void sequencer_setup(int loop, uint8_t *table_ptr)
 void sequencer_stop(void)
 {
   sequence_loop_counter = -1;
-  GPIOB->BRR = SEQUENCE_PORT_BIT_MASK;    /* Clear the port lines */
+  GPIOC->BRR = SEQUENCE_LED_PORT_MASK;
+  GPIOB->BRR = VIBRATOR_MASK;    /* Clear the port lines */
 }
 
 
@@ -106,13 +121,14 @@ void sequencer_update(void)
 /* If the loop counter is zero then turn off the LEDs */
   if (sequence_loop_counter == 0)
   {
-    GPIOB->BRR = SEQUENCE_PORT_BIT_MASK;    /* Clear the port lines */
+    GPIOC->BRR = SEQUENCE_LED_PORT_MASK;
+  GPIOB->BRR = VIBRATOR_MASK;    /* Clear the port lines */
     sequence_loop_counter = -1;
     return;
   }
 
 /* Set the next port values from the sequence table */
-  MODIFY_REG(GPIOB->ODR, SEQUENCE_PORT_BIT_MASK, *sequence_table_ptr & SEQUENCE_PORT_BIT_MASK);
+  sequence_write_pins(*sequence_table_ptr);
     
 
 /* Increment the sequence pointer and check if it is pointing to the end of the table */
@@ -132,6 +148,6 @@ void sequencer_update(void)
 **/
 void sequencer_static(uint8_t data)
 {
-  MODIFY_REG(GPIOB->ODR, SEQUENCE_PORT_BIT_MASK, data & SEQUENCE_PORT_BIT_MASK);
+  sequence_write_pins(data);
 }
 

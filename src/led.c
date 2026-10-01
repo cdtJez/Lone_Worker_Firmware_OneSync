@@ -12,13 +12,13 @@ uint32_t led_counter = 0;
 /**
  * @brief  Initialise the LED GPIO pin
  *
- *  LED on PA1
+ *  Blue LED on PC13, active high
 **/
 void led_init(void)
 {
-  RCC->IOPENR |= RCC_IOPENR_GPIOAEN;          /* Enable clock to GPIOA */
-  MODIFY_REGISTER (GPIOA->MODER, 0x000C, 0x0004);  /* Set PA1 to be an output */
-  GPIOA->BSRR = (1 << 1);                     /* Set PA1 high */
+  RCC->IOPENR |= RCC_IOPENR_GPIOCEN;          /* Enable clock to GPIOC */
+  MODIFY_REG (GPIOC->MODER, (3UL << 26), (1UL << 26));  /* Set PC13 to be an output */
+  GPIOC->BRR = (1 << 13);                     /* PC13 low: LED off */
 }
 
 
@@ -28,7 +28,7 @@ void led_init(void)
 **/
 void led_off(void)
 {
-  GPIOA->BSRR = (1 << 1);                     /* Set PA1 high */
+  GPIOC->BRR = (1 << 13);                     /* PC13 low: LED off */
   led_counter = 0;
 }
 
@@ -45,7 +45,7 @@ void led_off(void)
 void led_on(uint32_t count)
 {
   led_counter = count;
-  GPIOA->BRR = (1 << 1);                    /* Set PA1 low */
+  GPIOC->BSRR = (1 << 13);                    /* PC13 high: LED on */
 }
 
 
