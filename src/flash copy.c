@@ -2,7 +2,7 @@
 /**
  * @file  flash.c
  * @brief Read and write to flash
- * refactored from flash_copy.c to avoid duplicate code
+ *
 **/
 #include "main.h"
 
